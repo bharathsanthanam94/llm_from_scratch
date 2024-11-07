@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "simple_ReACT"
+version = "0.1.0"
+description = "Simple ReACT agent using langgraph"
+authors = ["Bharath Santhanam, bharathsanthanamdev@gmail.com"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "3.10.14"  # Adjust this to your Python version
+python-dotenv = "1.0.1"
+langchain = "0.2.12"
+langchain-core = "0.2.29"
+langchain-community = "0.2.11"
+langchain-openai = "0.1.20"
+langgraph = "0.2.3"
+rich = "13.7.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
