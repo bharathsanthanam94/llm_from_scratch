@@ -17,6 +17,8 @@ rich = "13.7.1"
 ipdb = "^0.13.13"  
 Pillow = "^10.2.0"  # Added this line
 pygraphviz = "^1.11"
+aiosqlite = "0.20.0"
+langgraph-checkpoint-sqlite = "1.0.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

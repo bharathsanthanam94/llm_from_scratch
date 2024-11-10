@@ -15,6 +15,9 @@ from langchain_core.messages import HumanMessage
 from rich.console import Console
 from PIL import Image as PILImage
 import ipdb
+from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.base import BaseCheckpointSaver
+from langgraph.checkpoint.memory import MemorySaver
 # initialize dotenv to load environment variables
 load_dotenv()
 
@@ -25,14 +28,15 @@ tool = TavilySearchResults(max_results=2)
 # print(type(tool))
 # print(tool.name)
 
-
+# memory = SqliteSaver.from_conn_string(":memory:")
+checkpointer = MemorySaver()
 class AgentState(TypedDict):
     messages: Annotated[list[AnyMessage], operator.add]
 
 
 class Agent:
 
-    def __init__(self, model, tools, system=""):
+    def __init__(self, model, tools, checkpointer: BaseCheckpointSaver, system=""):
         self.system = system
         graph = StateGraph(AgentState)
         graph.add_node("llm", self.call_openai)
@@ -44,7 +48,7 @@ class Agent:
         )
         graph.add_edge("action", "llm")
         graph.set_entry_point("llm")
-        self.graph = graph.compile()
+        self.graph = graph.compile(checkpointer=checkpointer)
         self.tools = {t.name: t for t in tools}
         self.model = model.bind_tools(tools)
 
@@ -83,18 +87,44 @@ If you need to look up some information before asking a follow up question, you 
 """
 
 model = ChatOpenAI(model="gpt-4-turbo")
-abot= Agent(model, [tool], system=prompt)
+abot= Agent(model, [tool], checkpointer=checkpointer, system=prompt )
 png_data = abot.graph.get_graph().draw_png()
 with open("graph.png", "wb") as f:
     f.write(png_data)
+# save the graph for visualization
 img = PILImage.open("graph.png")
-img.show()
-# Run the agent!
+# img.show()
 
-messages= [HumanMessage(content="Who won the 2024 T20 mens cricket world cup and what is the GDP of that country?")]
 
-result= abot.graph.invoke({"messages":messages})
-rich.print(result['messages'][-1].content)
+# After creating the agent (abot)
+thread = {"configurable":{"thread_id":"1"}}  # Keep track of conversation
+
+def chat_loop():
+    rich.print("[bold blue]Chat with AI Assistant (type 'quit' to exit)[/bold blue]")
+    
+    while True:
+        # Get user input
+        user_input = input("\n[You]: ").strip()
+        
+        # Check for quit command
+        if user_input.lower() == 'quit':
+            rich.print("[bold red]Ending chat session...[/bold red]")
+            break
+        
+        # Create message and process through graph
+        messages = [HumanMessage(content=user_input)]
+        
+        rich.print("\n[bold green]Assistant:[/bold green]")
+        # Stream the response
+        for event in abot.graph.stream({"messages": messages}, thread):
+            for v in event.values():
+                rich.print(v)
+        
+        print("\n" + "-"*50)  # Add a separator between conversations
+
+# Start the chat loop
+if __name__ == "__main__":
+    chat_loop()
 
 
 
