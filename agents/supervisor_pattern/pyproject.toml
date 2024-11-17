@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "supervisor_pattern"
+version = "0.2.0"
+description = "Multi-agent system using supervisor pattern in langgraph"
+authors = ["Bharath Santhanam, bharathsanthanamdev@gmail.com"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "3.10.15"  # Adjust this to your Python version
+python-dotenv = "1.0.1"
+langchain = "0.3.7"
+langchain-core = "0.3.17"
+langchain-community = "0.3.7"
+langchain-openai = "0.2.8"
+langgraph = "0.2.50"
+rich = "13.7.1"
+ipdb = "^0.13.13"  
+Pillow = "^10.2.0"  # Added this line
+pandas = "2.2.3"
+langsmith = "0.1.143"
+langchain_experimental = "0.3.3"
+
+
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
